@@ -45,11 +45,13 @@ class HomeViewModel @Inject constructor(
         return resources.asStateFlow()
     }
 
-    suspend fun addFolder(folderEntity: FolderEntity) {
+    suspend fun addFolder(name: String, parent: Int) {
+        val folderEntity = FolderEntity(name = name, parent = parent)
         repository.addFolder(folderEntity)
     }
 
-    suspend fun addResource(resourceEntity: ResourceEntity) {
+    suspend fun addResource(title: String, link: String, parent: Int) {
+        val resourceEntity = ResourceEntity(title = title, link = link, parent = parent)
         repository.addResource(resourceEntity)
     }
 
