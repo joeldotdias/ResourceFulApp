@@ -17,7 +17,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,9 +26,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -42,8 +41,6 @@ import com.example.resourceful.R
 import com.example.resourceful.domain.model.FolderEntity
 import com.example.resourceful.presentation.HomeViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
 @Composable
@@ -55,8 +52,10 @@ fun FolderItem(
     val focusManager = LocalFocusManager.current
 
     var isFolderExpanded by rememberSaveable { mutableStateOf(false) }
-    var showAddFolderForm by rememberSaveable { mutableStateOf(false) }
-    var showAddResourceForm by rememberSaveable { mutableStateOf(false) }
+    var isAddFolderFormVisible by rememberSaveable { mutableStateOf(false) }
+    var isAddResourceFormVisible by rememberSaveable { mutableStateOf(false) }
+    var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
+    var itemHeight by remember { mutableStateOf(0.dp) }
 
     var name by remember { mutableStateOf("") }
 
@@ -67,7 +66,8 @@ fun FolderItem(
     val resources = viewModel.getResources(folder.id).collectAsState().value
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -79,8 +79,8 @@ fun FolderItem(
                 modifier = Modifier.padding(end = 7.dp),
                 onClick = {
                     if(isFolderExpanded) {
-                        showAddFolderForm = false
-                        showAddResourceForm = false
+                        isAddFolderFormVisible = false
+                        isAddResourceFormVisible = false
                     }
                     isFolderExpanded = !isFolderExpanded
                 }
@@ -101,7 +101,7 @@ fun FolderItem(
             if(isFolderExpanded) {
                 IconButton(
                     onClick = {
-                        showAddFolderForm = !showAddFolderForm
+                        isAddFolderFormVisible = !isAddFolderFormVisible
                     }
                 ) {
                     Image(
@@ -112,7 +112,7 @@ fun FolderItem(
                 }
                 IconButton(
                     onClick = {
-                        showAddResourceForm = !showAddResourceForm
+                        isAddResourceFormVisible = !isAddResourceFormVisible
                     }
                 ) {
                     Icon(
@@ -123,7 +123,7 @@ fun FolderItem(
             }
         }
 
-        AnimatedVisibility(visible = (isFolderExpanded && showAddFolderForm)) {
+        AnimatedVisibility(visible = (isFolderExpanded && isAddFolderFormVisible)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -144,7 +144,7 @@ fun FolderItem(
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = {
-                            showAddFolderForm = false
+                            isAddFolderFormVisible = false
                             coroutineScope.launch {
                                 viewModel.addFolder(name, folder.id)
                             }
@@ -154,7 +154,7 @@ fun FolderItem(
             }
         }
 
-        AnimatedVisibility(visible = (isFolderExpanded && showAddResourceForm)) {
+        AnimatedVisibility(visible = (isFolderExpanded && isAddResourceFormVisible)) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
