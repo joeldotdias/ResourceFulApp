@@ -2,6 +2,7 @@ package com.example.resourceful.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.resourceful.R
@@ -50,12 +52,14 @@ fun FolderItem(
     coroutineScope: CoroutineScope,
 ) {
     val focusManager = LocalFocusManager.current
+    val density = LocalDensity.current
 
     var isFolderExpanded by rememberSaveable { mutableStateOf(false) }
     var isAddFolderFormVisible by rememberSaveable { mutableStateOf(false) }
     var isAddResourceFormVisible by rememberSaveable { mutableStateOf(false) }
     var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
     var itemHeight by remember { mutableStateOf(0.dp) }
+    var pressOffset by remember { mutableStateOf(DpOffset.Zero) }
 
     var name by remember { mutableStateOf("") }
 
@@ -68,11 +72,22 @@ fun FolderItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .onSizeChanged {
+                itemHeight = with(density) { it.height.toDp() }
+            }
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(2.dp),
+                .padding(2.dp)
+                .pointerInput(true) {
+                    detectTapGestures (
+                        onLongPress = {
+                            isContextMenuVisible = true
+                            pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
+                        }
+                    )
+                },
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
