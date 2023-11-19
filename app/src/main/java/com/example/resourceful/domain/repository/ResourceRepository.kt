@@ -10,9 +10,13 @@ interface ResourceRepository {
 
     fun getResources(resourceParent: Int): Flow<List<ResourceEntity>>
 
-    suspend fun addFolder(folderEntity: FolderEntity)
+    suspend fun upsertFolder(folderEntity: FolderEntity)
 
-    suspend fun addResource(resourceEntity: ResourceEntity)
+    suspend fun upsertResource(resourceEntity: ResourceEntity)
+
+//    suspend fun updateFolder(folderEntity: FolderEntity)
+//
+//    suspend fun updateResource(resourceEntity: ResourceEntity)
 
     suspend fun deleteFolder(folderEntity: FolderEntity)
 

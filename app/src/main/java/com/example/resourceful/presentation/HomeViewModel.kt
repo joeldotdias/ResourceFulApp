@@ -47,12 +47,20 @@ class HomeViewModel @Inject constructor(
 
     suspend fun addFolder(name: String, parent: Int) {
         val folderEntity = FolderEntity(name = name, parent = parent)
-        repository.addFolder(folderEntity)
+        repository.upsertFolder(folderEntity)
     }
 
     suspend fun addResource(title: String, link: String, parent: Int) {
         val resourceEntity = ResourceEntity(title = title, link = link, parent = parent)
-        repository.addResource(resourceEntity)
+        repository.upsertResource(resourceEntity)
+    }
+
+    suspend fun updateFolder(folderEntity: FolderEntity) {
+        repository.upsertFolder(folderEntity)
+    }
+
+    suspend fun updateResource(resourceEntity: ResourceEntity) {
+        repository.upsertResource(resourceEntity)
     }
 
     suspend fun deleteFolder(folderEntity: FolderEntity) {

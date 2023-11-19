@@ -18,13 +18,21 @@ class ResourceRepositoryImpl(
         return dao.getResources(resourceParent)
     }
 
-    override suspend fun addFolder(folderEntity: FolderEntity) {
+    override suspend fun upsertFolder(folderEntity: FolderEntity) {
         dao.upsertFolder(folderEntity)
     }
 
-    override suspend fun addResource(resourceEntity: ResourceEntity) {
+    override suspend fun upsertResource(resourceEntity: ResourceEntity) {
         dao.upsertResource(resourceEntity)
     }
+
+//    override suspend fun updateFolder(folderEntity: FolderEntity) {
+//        dao.upsertFolder()
+//    }
+//
+//    override suspend fun updateResource(resourceEntity: ResourceEntity) {
+//        TODO("Not yet implemented")
+//    }
 
     override suspend fun deleteFolder(folderEntity: FolderEntity) {
         dao.deleteFolder(folderEntity)

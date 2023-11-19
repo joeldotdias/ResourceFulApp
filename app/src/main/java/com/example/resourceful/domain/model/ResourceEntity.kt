@@ -12,10 +12,10 @@ data class ResourceEntity(
     val id: Int = 0,
 
     @ColumnInfo(name = "res_title")
-    val title: String = "",
+    var title: String = "",
 
     @ColumnInfo(name = "res_link")
-    val link: String = "",
+    var link: String = "",
 
     @ColumnInfo(name = "res_parent")
     val parent: Int = 0
