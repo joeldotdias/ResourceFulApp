@@ -2,17 +2,15 @@ package com.example.resourceful.presentation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LibraryAdd
 import androidx.compose.material3.Button
@@ -23,8 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -49,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.resourceful.R
-import com.example.resourceful.presentation.components.AddResourceForm
 import com.example.resourceful.presentation.components.FolderItem
 import com.example.resourceful.presentation.components.ResourceItem
 import com.example.resourceful.util.AppColors
@@ -90,148 +85,154 @@ fun HomeScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = AppColors.titleBar)
             )
         },
-        containerColor = MaterialTheme.colorScheme.primaryContainer
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
     ) { topBarPadding ->
-        Column(
-            modifier = Modifier.padding(top = topBarPadding.calculateTopPadding())
+        LazyColumn(
+            modifier = Modifier.padding(top = topBarPadding.calculateTopPadding()).fillMaxWidth()
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Your Reservoir",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontSize = 20.sp
-                )
-                Row(
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    IconButton(
-                        onClick = {
-                            isAddingFolder = !isAddingFolder
-                        }
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.add_folder_icon),
-                            modifier = Modifier.size(32.dp),
-                            contentDescription = "Add Folder icon"
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            isAddingResource = !isAddingResource
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.LibraryAdd,
-                            modifier = Modifier.size(26.dp),
-                            contentDescription = "Add Resource icon"
-                        )
-                    }
-                }
-
-            }
-
-            AnimatedVisibility(visible = isAddingFolder) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(18.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        placeholder = { Text(text = "New Folder") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 5.dp, start = 18.dp, end = 18.dp),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                isAddingFolder = false
-                                coroutineScope.launch {
-                                    viewModel.addFolder(name, 0)
-                                }
-                            }
-                        )
-                    )
-                }
-            }
-            AnimatedVisibility(visible = isAddingResource) {
+            item {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    OutlinedTextField(
-                        value = title,
-                        onValueChange = { title = it },
-                        label = { Text(text = "Title") },
-                        maxLines = 1,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 5.dp),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Next,
-                            capitalization = KeyboardCapitalization.Sentences
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext ={
-                                focusManager.moveFocus(FocusDirection.Down)
-                            }
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Your Reservoir",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 20.sp
                         )
-                    )
-                    OutlinedTextField(
-                        value = link,
-                        onValueChange = { link = it },
-                        label = { Text(text = "Link") },
-                        maxLines = 3,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 5.dp),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext ={
-                                focusManager.clearFocus()
-                            }
-                        )
-                    )
-                    Button(
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        onClick = {
-                            coroutineScope.launch {
-                                viewModel.addResource(
-                                    title = title,
-                                    link = link,
-                                    parent = 0
+                        Row(
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    isAddingFolder = !isAddingFolder
+                                }
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.add_folder_icon),
+                                    modifier = Modifier.size(32.dp),
+                                    contentDescription = "Add Folder icon"
                                 )
                             }
-                            isAddingResource = false
+
+                            IconButton(
+                                onClick = {
+                                    isAddingResource = !isAddingResource
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.LibraryAdd,
+                                    modifier = Modifier.size(26.dp),
+                                    contentDescription = "Add Resource icon"
+                                )
+                            }
                         }
-                    ) {
-                        Text(text = "Save")
+
+                    }
+
+                    AnimatedVisibility(visible = isAddingFolder) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(18.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = name,
+                                onValueChange = { name = it },
+                                placeholder = { Text(text = "New Folder") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 5.dp, start = 18.dp, end = 18.dp),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        isAddingFolder = false
+                                        coroutineScope.launch {
+                                            viewModel.addFolder(name, 0)
+                                        }
+                                    }
+                                )
+                            )
+                        }
+                    }
+                    AnimatedVisibility(visible = isAddingResource) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = title,
+                                onValueChange = { title = it },
+                                label = { Text(text = "Title") },
+                                maxLines = 1,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 5.dp),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Next,
+                                    capitalization = KeyboardCapitalization.Sentences
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onNext ={
+                                        focusManager.moveFocus(FocusDirection.Down)
+                                    }
+                                )
+                            )
+                            OutlinedTextField(
+                                value = link,
+                                onValueChange = { link = it },
+                                label = { Text(text = "Link") },
+                                maxLines = 3,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 5.dp),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onNext ={
+                                        focusManager.clearFocus()
+                                    }
+                                )
+                            )
+                            Button(
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                                onClick = {
+                                    coroutineScope.launch {
+                                        viewModel.addResource(
+                                            title = title,
+                                            link = link,
+                                            parent = 0
+                                        )
+                                    }
+                                    isAddingResource = false
+                                }
+                            ) {
+                                Text(text = "Save")
+                            }
+                        }
+                    }
+
+                    folders.forEach { folder ->
+                        FolderItem(folder, viewModel, coroutineScope)
+                    }
+                    resources.forEach { resource ->
+                        ResourceItem(resource, viewModel, coroutineScope)
                     }
                 }
-            }
-
-            folders.forEach { folder ->
-                FolderItem(folder, viewModel, coroutineScope)
-            }
-            resources.forEach { resource ->
-                ResourceItem(resource, viewModel, coroutineScope)
             }
         }
     }
