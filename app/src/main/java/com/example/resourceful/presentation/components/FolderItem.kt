@@ -11,8 +11,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LibraryAdd
+import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -58,8 +63,11 @@ fun FolderItem(
     var isAddFolderFormVisible by rememberSaveable { mutableStateOf(false) }
     var isAddResourceFormVisible by rememberSaveable { mutableStateOf(false) }
     var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
+    var isEditingFolder by rememberSaveable { mutableStateOf(false) }
+
     var itemHeight by remember { mutableStateOf(0.dp) }
     var pressOffset by remember { mutableStateOf(DpOffset.Zero) }
+    val dropdownItems = listOf("Edit", "Delete")
 
     var name by remember { mutableStateOf("") }
 
@@ -81,7 +89,7 @@ fun FolderItem(
                 .fillMaxWidth()
                 .padding(2.dp)
                 .pointerInput(true) {
-                    detectTapGestures (
+                    detectTapGestures(
                         onLongPress = {
                             isContextMenuVisible = true
                             pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
@@ -106,12 +114,36 @@ fun FolderItem(
                     contentDescription = "Opened/Closed Folder icon"
                 )
             }
-            
             Text(
                 text = folder.name,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 17.sp
             )
+            
+            DropdownMenu(
+                expanded = isContextMenuVisible,
+                onDismissRequest = { isContextMenuVisible = false }
+            ) {
+                dropdownItems.forEach { item ->
+                    DropdownMenuItem(
+                        text = { Text(text = item) },
+                        leadingIcon = {
+                            Icon(imageVector = if(item == "Delete") Icons.Filled.Delete else Icons.Filled.Edit, contentDescription = "")
+                        },
+                        onClick = {
+                            if(item == "Delete") {
+                                 coroutineScope.launch {
+                                     viewModel.deleteFolder(folder)
+                                 }
+                            }
+                            else {
+                                isEditingFolder = true
+                            }
+                            isContextMenuVisible = false
+                        }
+                    )
+                }
+            }
 
             if(isFolderExpanded) {
                 IconButton(
@@ -138,7 +170,7 @@ fun FolderItem(
             }
         }
 
-        AnimatedVisibility(visible = (isFolderExpanded && isAddFolderFormVisible)) {
+        AnimatedVisibility(visible = ((isFolderExpanded && isAddFolderFormVisible)) || isEditingFolder) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -148,10 +180,17 @@ fun FolderItem(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    placeholder = { Text(text = "New Folder") },
+                    placeholder = { Text(text = if(isEditingFolder) folder.name else "New Folder") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 5.dp),
+                    trailingIcon = {
+                        if(isEditingFolder) {
+                            IconButton(onClick = {
+                                isEditingFolder = false
+                            }) { Icon(imageVector = Icons.Outlined.Cancel, contentDescription = null) }
+                        }
+                    },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Done,
@@ -160,8 +199,13 @@ fun FolderItem(
                     keyboardActions = KeyboardActions(
                         onDone = {
                             isAddFolderFormVisible = false
-                            coroutineScope.launch {
-                                viewModel.addFolder(name, folder.id)
+                            if(isEditingFolder) {
+                                val updatedFolder = folder.copy(name = name)
+                                coroutineScope.launch { viewModel.updateFolder(updatedFolder) }
+                                isEditingFolder = false
+                            }
+                            else {
+                                coroutineScope.launch { viewModel.addFolder(name, folder.id) }
                             }
                         }
                     )
