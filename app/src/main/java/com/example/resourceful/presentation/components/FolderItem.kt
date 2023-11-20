@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LibraryAdd
 import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import com.example.resourceful.R
 import com.example.resourceful.domain.model.FolderEntity
 import com.example.resourceful.presentation.HomeViewModel
+import com.example.resourceful.util.AlertMessages
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -64,6 +66,7 @@ fun FolderItem(
     var isAddResourceFormVisible by rememberSaveable { mutableStateOf(false) }
     var isContextMenuVisible by rememberSaveable { mutableStateOf(false) }
     var isEditingFolder by rememberSaveable { mutableStateOf(false) }
+    var isDeletionDialogVisible by rememberSaveable { mutableStateOf(false) }
 
     var itemHeight by remember { mutableStateOf(0.dp) }
     var pressOffset by remember { mutableStateOf(DpOffset.Zero) }
@@ -132,9 +135,7 @@ fun FolderItem(
                         },
                         onClick = {
                             if(item == "Delete") {
-                                 coroutineScope.launch {
-                                     viewModel.deleteFolder(folder)
-                                 }
+                                 isDeletionDialogVisible = true
                             }
                             else {
                                 isEditingFolder = true
@@ -170,6 +171,17 @@ fun FolderItem(
             }
         }
 
+        if(isDeletionDialogVisible) {
+            DeletionDialog(
+                description = AlertMessages.deleteFolderText,
+                onDismiss = { isDeletionDialogVisible = false }
+            ) {
+                coroutineScope.launch {
+                    viewModel.deleteFolder(folder)
+                }
+            }
+        }
+
         AnimatedVisibility(visible = ((isFolderExpanded && isAddFolderFormVisible)) || isEditingFolder) {
             Row(
                 modifier = Modifier
@@ -177,13 +189,14 @@ fun FolderItem(
                     .padding(2.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                if(isEditingFolder) name = folder.name
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    placeholder = { Text(text = if(isEditingFolder) folder.name else "New Folder") },
+                    placeholder = { if(!isEditingFolder) Text(text = "New Folder") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 5.dp),
+                        .padding(start = 40.dp, bottom = 5.dp),
                     trailingIcon = {
                         if(isEditingFolder) {
                             IconButton(onClick = {
@@ -256,6 +269,7 @@ fun FolderItem(
                     )
                 )
                 Button(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
                     onClick = {
                         coroutineScope.launch {
                             viewModel.addResource(
@@ -264,6 +278,7 @@ fun FolderItem(
                                 parent = folder.id
                             )
                         }
+                        isAddResourceFormVisible = false
                     }
                 ) {
                     Text(text = "Save")

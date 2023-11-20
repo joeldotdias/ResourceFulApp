@@ -16,13 +16,16 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,16 +39,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.resourceful.domain.model.ResourceEntity
 import com.example.resourceful.presentation.HomeViewModel
+import com.example.resourceful.util.AlertMessages
 import com.example.resourceful.util.AppColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResourceItem(
     resource: ResourceEntity,
@@ -57,6 +63,7 @@ fun ResourceItem(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     var isEditingResource by rememberSaveable { mutableStateOf(false) }
+    var isDeletionDialogVisible by rememberSaveable { mutableStateOf(false) }
 
     var title by rememberSaveable { mutableStateOf(resource.title) }
     var link by rememberSaveable { mutableStateOf(resource.link) }
@@ -125,9 +132,10 @@ fun ResourceItem(
                 IconButton(
                     modifier = Modifier.size(32.dp),
                     onClick = {
-                        coroutineScope.launch {
-                            viewModel.deleteResource(resource)
-                        }
+//                        coroutineScope.launch {
+//                            viewModel.deleteResource(resource)
+//                        }
+                        isDeletionDialogVisible = true
                     }
                 ) {
                     Icon(
@@ -138,6 +146,42 @@ fun ResourceItem(
                 }
             }
         }
+
+        if(isDeletionDialogVisible) {
+            DeletionDialog(
+                description = AlertMessages.deleteFolderText,
+                onDismiss = { isDeletionDialogVisible = false }) {
+                coroutineScope.launch {
+                    viewModel.deleteResource(resource)
+                }
+            }
+//            AlertDialog(
+//                icon = { Icon(imageVector = Icons.Filled.Delete, contentDescription = "Example Icon") },
+//                title = { Text(text = AlertMessages.deletionTitle) },
+//                text = { Text(text = AlertMessages.deleteResourceText) },
+//                onDismissRequest = { isDeletionDialogVisible = false },
+//                confirmButton = {
+//                    TextButton(
+//                        onClick = {
+//                            coroutineScope.launch {
+//                                viewModel.deleteResource(resource)
+//                            }
+//                        }
+//                    ) {
+//                        Text("Confirm")
+//                    }
+//                },
+//                dismissButton = {
+//                    TextButton(
+//                        onClick = { isDeletionDialogVisible = false }
+//                    ) {
+//                        Text("Dismiss")
+//                    }
+//                }
+//            )
+        }
+
+
         AnimatedVisibility(visible = isEditingResource) {
             Column {
                 OutlinedTextField(
@@ -150,7 +194,8 @@ fun ResourceItem(
                         .padding(bottom = 5.dp),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Next,
+                        capitalization = KeyboardCapitalization.Sentences
                     ),
                     keyboardActions = KeyboardActions(
                         onNext ={
