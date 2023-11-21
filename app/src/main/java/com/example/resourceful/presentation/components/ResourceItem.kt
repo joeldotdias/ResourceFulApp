@@ -51,7 +51,6 @@ import com.example.resourceful.util.AppColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResourceItem(
     resource: ResourceEntity,
@@ -132,9 +131,6 @@ fun ResourceItem(
                 IconButton(
                     modifier = Modifier.size(32.dp),
                     onClick = {
-//                        coroutineScope.launch {
-//                            viewModel.deleteResource(resource)
-//                        }
                         isDeletionDialogVisible = true
                     }
                 ) {
@@ -155,30 +151,7 @@ fun ResourceItem(
                     viewModel.deleteResource(resource)
                 }
             }
-//            AlertDialog(
-//                icon = { Icon(imageVector = Icons.Filled.Delete, contentDescription = "Example Icon") },
-//                title = { Text(text = AlertMessages.deletionTitle) },
-//                text = { Text(text = AlertMessages.deleteResourceText) },
-//                onDismissRequest = { isDeletionDialogVisible = false },
-//                confirmButton = {
-//                    TextButton(
-//                        onClick = {
-//                            coroutineScope.launch {
-//                                viewModel.deleteResource(resource)
-//                            }
-//                        }
-//                    ) {
-//                        Text("Confirm")
-//                    }
-//                },
-//                dismissButton = {
-//                    TextButton(
-//                        onClick = { isDeletionDialogVisible = false }
-//                    ) {
-//                        Text("Dismiss")
-//                    }
-//                }
-//            )
+
         }
 
 

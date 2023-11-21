@@ -22,24 +22,27 @@ class ResourceRepositoryImpl(
         dao.upsertFolder(folderEntity)
     }
 
-    override suspend fun upsertResource(resourceEntity: ResourceEntity) {
-        dao.upsertResource(resourceEntity)
+    override suspend fun deleteEntireFolder(folder: FolderEntity) {
+        val nextOfKinFolders = dao.getDescendantFolders(folder.id)
+        val nextOfKinResources = dao.getDescendantResources(folder.id)
+
+        nextOfKinResources.forEach { resource ->
+            dao.deleteResource(resource)
+        }
+
+        dao.deleteFolder(folder)
+        while(nextOfKinFolders.isNotEmpty()) {
+            nextOfKinFolders.forEach { fld ->
+                deleteEntireFolder(fld)
+            }
+        }
     }
 
-//    override suspend fun updateFolder(folderEntity: FolderEntity) {
-//        dao.upsertFolder()
-//    }
-//
-//    override suspend fun updateResource(resourceEntity: ResourceEntity) {
-//        TODO("Not yet implemented")
-//    }
-
-    override suspend fun deleteFolder(folderEntity: FolderEntity) {
-        dao.deleteFolder(folderEntity)
+    override suspend fun upsertResource(resourceEntity: ResourceEntity) {
+        dao.upsertResource(resourceEntity)
     }
 
     override suspend fun deleteResource(resourceEntity: ResourceEntity) {
         dao.deleteResource(resourceEntity)
     }
-
 }

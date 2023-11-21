@@ -17,6 +17,12 @@ interface ResourceDao {
     @Query("SELECT * FROM resources WHERE res_parent = :resourceParent")
     fun getResources(resourceParent: Int): Flow<List<ResourceEntity>>
 
+    @Query("SELECT * FROM folders WHERE fld_parent = :parentFolder")
+    fun getDescendantFolders(parentFolder: Int): List<FolderEntity>
+
+    @Query("SELECT * FROM resources WHERE res_parent = :parentFolder")
+    fun getDescendantResources(parentFolder: Int): List<ResourceEntity>
+
     @Upsert
     suspend fun upsertFolder(folderEntity: FolderEntity)
 

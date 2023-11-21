@@ -14,11 +14,7 @@ interface ResourceRepository {
 
     suspend fun upsertResource(resourceEntity: ResourceEntity)
 
-//    suspend fun updateFolder(folderEntity: FolderEntity)
-//
-//    suspend fun updateResource(resourceEntity: ResourceEntity)
-
-    suspend fun deleteFolder(folderEntity: FolderEntity)
+    suspend fun deleteEntireFolder(folder: FolderEntity)
 
     suspend fun deleteResource(resourceEntity: ResourceEntity)
 }

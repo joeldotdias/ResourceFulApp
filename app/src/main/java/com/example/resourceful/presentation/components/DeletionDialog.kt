@@ -24,6 +24,7 @@ fun DeletionDialog(
             TextButton(
                 onClick = {
                     onDelete()
+                    onDismiss()
                 }
             ) {
                 Text("Confirm")

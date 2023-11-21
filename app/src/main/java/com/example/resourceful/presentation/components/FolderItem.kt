@@ -49,6 +49,7 @@ import com.example.resourceful.domain.model.FolderEntity
 import com.example.resourceful.presentation.HomeViewModel
 import com.example.resourceful.util.AlertMessages
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
@@ -175,8 +176,8 @@ fun FolderItem(
                 description = AlertMessages.deleteFolderText,
                 onDismiss = { isDeletionDialogVisible = false }
             ) {
-                coroutineScope.launch {
-                    viewModel.deleteFolder(folder)
+                coroutineScope.launch(Dispatchers.IO) {
+                    viewModel.deleteEntireFolder(folder)
                 }
             }
         }

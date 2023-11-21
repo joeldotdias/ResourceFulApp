@@ -63,8 +63,10 @@ class HomeViewModel @Inject constructor(
         repository.upsertResource(resourceEntity)
     }
 
-    suspend fun deleteFolder(folderEntity: FolderEntity) {
-        repository.deleteFolder(folderEntity)
+    suspend fun deleteEntireFolder(folderEntity: FolderEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteEntireFolder(folderEntity)
+        }
     }
 
     suspend fun deleteResource(resourceEntity: ResourceEntity) {
